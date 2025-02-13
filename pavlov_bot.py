@@ -28,6 +28,7 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f"Logged in as {bot.user.name}")
 
+# Command to start an event
 @bot.command()
 async def start_event(ctx, channel: discord.TextChannel, role: discord.Role):
     """Announces an event and asks users to react to participate."""
@@ -36,6 +37,7 @@ async def start_event(ctx, channel: discord.TextChannel, role: discord.Role):
 
     bot.event_message_id = event_message.id
 
+# Command to pick winners
 @bot.command()
 async def pick_winners(ctx, channel: discord.TextChannel):
     """Selects 10 random users who reacted to the event message."""
@@ -43,17 +45,21 @@ async def pick_winners(ctx, channel: discord.TextChannel):
         await ctx.send("No event message found. Start an event with !start_event")
         return
     
+    # Grabs list of users who reacted to the event message
     event_message = await channel.fetch_message(bot.event_message_id)
     reaction = discord.utils.get(event_message.reactions, emoji="✅")
     users = [user async for user in reaction.users() if not user.bot]
     
     if users:
+        # Select 8 random winners and create a list of non-winners
         winners = random.sample(users, min(8, len(users)))
         non_winners = [user for user in users if user not in winners]
 
+        # Announces the winners
         winner_mentions = ', '.join(user.mention for user in winners)
         await channel.send(f"🎉 The participants will be: {winner_mentions} 🎉")
 
+        # Write non-winners to a CSV file
         file_path = "non_winners.csv"
         with open(file_path, mode='w', newline='') as file:
             csv_writer = csv.writer(file)
