@@ -2,6 +2,7 @@
 from dotenv import load_dotenv
 import os
 import random
+import csv
 
 # Imports for Discord API
 import discord
@@ -47,9 +48,18 @@ async def pick_winners(ctx, channel: discord.TextChannel):
     users = [user async for user in reaction.users() if not user.bot]
     
     if users:
-        winners = random.sample(users, min(10, len(users)))
+        winners = random.sample(users, min(8, len(users)))
+        non_winners = [user for user in users if user not in winners]
+
         winner_mentions = ', '.join(user.mention for user in winners)
         await channel.send(f"🎉 The participants will be: {winner_mentions} 🎉")
+
+        file_path = "non_winners.csv"
+        with open(file_path, mode='w', newline='') as file:
+            csv_writer = csv.writer(file)
+            csv_writer.writerow(["User ID", "Username"])
+            for user in non_winners:
+                csv_writer.writerow([user.id, user.name]) 
     else:
         await ctx.send("No reactions found on the event message.")
 
