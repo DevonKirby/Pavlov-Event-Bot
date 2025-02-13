@@ -28,28 +28,28 @@ async def on_ready():
     print(f"Logged in as {bot.user.name}")
 
 @bot.command()
-async def start_event(ctx):
+async def start_event(ctx, channel: discord.TextChannel, role: discord.Role):
     """Announces an event and asks users to react to participate."""
-    event_message = await ctx.send("React with ✅ to participate in the event!")
+    event_message = await channel.send(f"{role.mention} React with ✅ to participate in the event!")
     await event_message.add_reaction("✅")
 
     bot.event_message_id = event_message.id
 
 @bot.command()
-async def pick_winners(ctx):
+async def pick_winners(ctx, channel: discord.TextChannel):
     """Selects 10 random users who reacted to the event message."""
     if not hasattr(bot, 'event_message_id'):
         await ctx.send("No event message found. Start an event with !start_event")
         return
     
-    event_message = await ctx.channel.fetch_message(bot.event_message_id)
+    event_message = await channel.fetch_message(bot.event_message_id)
     reaction = discord.utils.get(event_message.reactions, emoji="✅")
+    users = [user async for user in reaction.users() if not user.bot]
     
-    if reaction:
-        users = [user async for user in reaction.users() if not user.bot]
+    if users:
         winners = random.sample(users, min(10, len(users)))
         winner_mentions = ', '.join(user.mention for user in winners)
-        await ctx.send(f"🎉 Winners: {winner_mentions} 🎉")
+        await channel.send(f"🎉 The participants will be: {winner_mentions} 🎉")
     else:
         await ctx.send("No reactions found on the event message.")
 
