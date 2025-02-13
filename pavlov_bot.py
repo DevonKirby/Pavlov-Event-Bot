@@ -31,7 +31,13 @@ async def on_ready():
 # Command to start an event
 @bot.command()
 async def start_event(ctx, channel: discord.TextChannel, role: discord.Role):
-    """Announces an event and asks users to react to participate."""
+    """
+    Announces an event and asks users to react to participate.
+
+    Args:
+        channel (discord.TextChannel): The channel where the event message will be sent.
+        role (discord.Role): The role to mention in the event message.
+    """
     event_message = await channel.send(f"{role.mention} React with ✅ to participate in the event!")
     await event_message.add_reaction("✅")
 
@@ -40,7 +46,13 @@ async def start_event(ctx, channel: discord.TextChannel, role: discord.Role):
 # Command to pick winners
 @bot.command()
 async def pick_winners(ctx, channel: discord.TextChannel):
-    """Selects 10 random users who reacted to the event message."""
+    """
+    Selects 8 random users who reacted to the event message to partcipate in the event.
+    The non-winners are written to a CSV file locally.
+    
+    Args:
+        channel (discord.TextChannel): The channel where the event message is located.
+    """
     if not hasattr(bot, 'event_message_id'):
         await ctx.send("No event message found. Start an event with !start_event")
         return
